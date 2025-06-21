@@ -15,7 +15,7 @@
 #define RTC_SCL_PIN 22 // RTC SCL pin
 #define RTC_SDA_PIN 21 // RTC SDA pin
 
-// SoftwareSerial softwareSerial(DFPLAYER_RX_PIN, DFPLAYER_TX_PIN);
+
 
 DFRobotDFPlayerMini player;
 RTC_DS1307 rtc;
@@ -25,14 +25,21 @@ char daysOfTheWeek[7][12] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursd
 boolean is_motion_detected = false;
 bool is_audio_playing = false;
 
-bool morning_audio_played_today = false; // Flag to check if morning audio has been played today
-bool evening_audio_played_today = false; // Flag to check if evening audio has been played today
+bool morning1_audio_played_today = false; // Flag to check if morning audio has been played today
+bool morning2_audio_played_today = false; // Flag to check if morning audio has been played today
+bool morning3_audio_played_today = false; // Flag to check if morning audio has been played today
+
+bool evening1_audio_played_today = false; // Flag to check if evening audio has been played today
+bool evening2_audio_played_today = false; // Flag to check if evening audio has been played today
 
 uint8_t MORNING_HOUR = 6;  // Hour to play morning audio
 uint8_t EVENING_HOUR = 18; // Hour to play evening audio
 
 unsigned long last_audio_check = 0; // Last time audio was checked
 unsigned long last_motion_time = 0; // Last time motion was detected
+
+
+uint8_t damma_pada_index = 1;
 
 // Checks if motion was detected, sets LED HIGH and starts a timer
 void IRAM_ATTR detectsMovement()
@@ -105,8 +112,12 @@ void loop()
   // Reset flags at midnight
   if (now.hour() == 0 && now.minute() == 0 && now.second() == 0)
   {
-    morning_audio_played_today = false;
-    evening_audio_played_today = false;
+    morning1_audio_played_today = false;
+    morning2_audio_played_today = false;
+    morning3_audio_played_today = false;
+
+    evening1_audio_played_today = false;
+    evening2_audio_played_today = false;
   }
 
   // Check once per second
@@ -115,24 +126,44 @@ void loop()
     last_audio_check = millis();
 
     // Morning audio
-    if (now.hour() == MORNING_HOUR && now.minute() == 0 && !morning_audio_played_today && !is_audio_playing)
+    if (now.hour() == MORNING_HOUR && now.minute() == 1 && !morning1_audio_played_today && !is_audio_playing)
     {
-      playAudio(1);
-      morning_audio_played_today = true;
+      playAudio(21); // seth pirith
+      morning1_audio_played_today = true;
+    }
+
+    // Morning audio
+    if (now.hour() == MORNING_HOUR && now.minute() == 20 && !morning2_audio_played_today && !is_audio_playing)
+    {
+      playAudio(24); // jayamanagala gatha
+      morning2_audio_played_today = true;
+    }
+    // Morning audio
+    if (now.hour() == MORNING_HOUR && now.minute() == 45 && !morning3_audio_played_today && !is_audio_playing)
+    {
+      playAudio(23); // naraseeha
+      morning3_audio_played_today = true;
     }
 
     // Evening audio
-    if (now.hour() == EVENING_HOUR && now.minute() == 0 && !evening_audio_played_today && !is_audio_playing)
+    if (now.hour() == EVENING_HOUR && now.minute() == 0 && !evening1_audio_played_today && !is_audio_playing)
     {
-      playAudio(2);
-      evening_audio_played_today = true;
+      playAudio(21); 
+      evening1_audio_played_today = true;
+    }
+    // Evening audio
+    if (now.hour() == EVENING_HOUR && now.minute() == 20 && !evening2_audio_played_today && !is_audio_playing)
+    {
+      playAudio(22);
+      evening2_audio_played_today = true;
     }
   }
 
   // Motion audio
-  if (is_motion_detected && !is_audio_playing && millis() - last_motion_time > 10000)
+  if (is_motion_detected && !is_audio_playing && (millis() - last_motion_time > 10000) && ((now.hour() != MORNING_HOUR)||(now.hour() != EVENING_HOUR)))
   { // 10s debounce
-    playAudio(3);
+    playAudio(damma_pada_index);
+    damma_pada_index++;
     last_motion_time = millis();
     is_motion_detected = false;
   }
